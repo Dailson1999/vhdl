@@ -1,0 +1,55 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity proj_vhdl is
+    port(
+        clk: in std_logic;
+        sw: in std_logic;
+        saida: out std_logic;
+        a: in std_logic_vector(7 downto 0);
+        b: in std_logic_vector(7 downto 0);
+        s: out std_logic_vector(7 downto 0);
+        count: out std_logic
+    );
+end proj_vhdl;
+
+architecture comportamental of proj_vhdl is
+    signal enable: std_logic := '0';
+    signal temp_a, temp_b: unsigned(7 downto 0);
+    signal temp: unsigned(8 downto 0);
+    
+begin
+    temp_a <= unsigned(a);
+    temp_b <= unsigned(b);
+    
+    process(clk)        
+    begin
+        if rising_edge(clk) then
+            if sw = '1' then
+                enable <= not enable;
+            end if;
+            
+            if enable = '1' then
+                -- Realiza a operação de subtração quando enable está ativo
+                temp <= ('0' & temp_a) - ('0' & temp_b);
+            else
+                -- Realiza a operação de adição quando enable está inativo
+                temp <= ('0' & temp_a) + ('0' & temp_b);
+            end if;
+            
+            s <= std_logic_vector(temp(7 downto 0));
+            count <= temp(8);
+        end if;
+    end process;
+    
+    process(temp)
+    begin
+        -- Define a saída como '1' quando o resultado da operação é negativo (carry = '1')
+        -- Caso contrário, define a saída como '0'
+        if temp(8) = '1' then
+            saida <= '1';
+        else
+            saida <= '0';
+        end if;
+    end process;
